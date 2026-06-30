@@ -1,5 +1,17 @@
+let hair
+let can
+
+
+function preload(){
+  hair = loadImage('images/crazy-hair.png')
+  can = loadImage('images/soda-can.png')
+}
+
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  imageMode(CENTER)
   rectMode(CENTER);
 }
 function draw() {
@@ -9,6 +21,12 @@ function draw() {
   //head
   fill(229, 218, 176);
   ellipse(300, 300, 500);
+
+  //hair
+  image(hair, 300, 90, 400, 200)
+
+  //can
+  image(can, 500, 500, 300, 300)
 
   //cheeks
   fill(255, 66, 82);
