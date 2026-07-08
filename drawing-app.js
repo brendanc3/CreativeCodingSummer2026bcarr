@@ -47,6 +47,11 @@ function keyPressed(){
 		ellipseBrushBool = true
 	}
 
+	if(key === 'b'){
+		lineBrushBool = true
+		ellipseBrushBool = true
+	}
+
 	if(key === 'o'){
 		lineBrushBool = false
 		ellipseBrushBool = false

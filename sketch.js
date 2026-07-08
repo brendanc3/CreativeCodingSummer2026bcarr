@@ -5,20 +5,18 @@ let teeth
 let hairBool = false
 let dentalBool = false
 
-
 function preload(){
   hair = loadImage('images/crazy-hair.png')
   can = loadImage('images/soda-can.png')
   teeth = loadImage('images/perfect-teeth.png')
 }
 
-
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   imageMode(CENTER)
   rectMode(CENTER);
 }
+
 function draw() {
 
   background(255);
@@ -86,7 +84,6 @@ function draw() {
   if(dentalBool == true){
     teethFix()
   }
-
 }
 
 function hairFix(){
