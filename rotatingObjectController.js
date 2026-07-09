@@ -21,17 +21,34 @@ let score = 0
 let damage = 0
 let damageCooldown = 0
 
+let level = 0
+let rockNumber = [10, 15, 20, 25]
+
 let startButton
 let retryButton
+let nextlvlButton
 
+let pixelFont
+let oceanBackground
+let boat
+let wreckBackground
+
+function preload(){
+  pixelFont = loadFont('fonts/pixel.ttf')
+  oceanBackground = loadImage('images/ocean-pixel-background.png')
+  boat = loadImage('images/pixel-boat.png')
+  wreckBackground = loadImage('images/pixel-shipwreck.jpg')
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   angleMode(RADIANS);
+  imageMode(CENTER)
+  textAlign(CENTER)
   posX = width / 2;
   posY = height / 2;
 
-  for(let i = 0; i < 10; i++){
+  for(let i = 0; i < rockNumber[level]; i++){
     rockX.push(random(30, windowWidth - 30))
     rockY.push(random(30, windowHeight - 30))
   }
@@ -43,12 +60,17 @@ function setup() {
 
   startButton = createButton('Start Game')
   startButton.mousePressed(gameStart)
-  startButton.position(windowWidth/2, windowHeight/2)
+  //startButton.position(windowWidth/2, windowHeight/2)
 
-  retryButton = createButton('Try Again')
+  retryButton = createButton('Play Again')
   retryButton.mousePressed(gameStart)
-  retryButton.position(windowWidth/2, windowHeight/2.5)
+  //retryButton.position(windowWidth/2, windowHeight/2)
   retryButton.hide()
+
+  nextlvlButton = createButton('Next Level')
+  nextlvlButton.mousePressed(gameStart)
+  //nextlvlButton.position(windowWidth/2, windowHeight/2)
+  nextlvlButton.hide()
   
 }
 
@@ -65,18 +87,23 @@ function draw() {
 
   // death screen
   if(deathBool == true){
-    background(255, 0, 0)
+    // background(255, 0, 0)
+    image(wreckBackground, width/2, height/2, width, height)
     fill(17)
     textSize(50)
-    text("You Lose!", windowWidth/2, windowHeight/2)
+    text("You Lose!", windowWidth/2, windowHeight/2.75)
   }
 
-  //win screen
-  if(winBool == true){
+  if (winBool && level > 3){
     background(240, 233, 46)
     fill(17)
     textSize(50)
-    text("You Win!!", windowWidth/1.5, windowHeight/1.5)
+    text("You Win!!", windowWidth/2, windowHeight/2.75)
+  } else if (winBool){
+    background(0, 255, 0)
+    fill(17)
+    textSize(50)
+    text("Level " + level + " Complete!", windowWidth/2, windowHeight/2.75)
   }
 }
 
@@ -92,6 +119,11 @@ function keyPressed() {
 function gameStart() {
   startButton.hide();
   retryButton.hide();
+  nextlvlButton.hide()
+
+  if(level > 3){
+    level = 0
+  }
 
   startBool = false;
   deathBool = false;
@@ -116,7 +148,7 @@ function gameStart() {
   coinX = [];
   coinY = [];
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < rockNumber[level]; i++) {
     rockX.push(random(30, width - 30));
     rockY.push(random(30, height - 30));
   }
@@ -133,25 +165,35 @@ function gameLoss(){
   deathBool = true 
   gameBool = false
   winBool = false
+  level = 0
 }
 
 function gameWin(){
-  retryButton.show()
+
+  if(level < 3){
+    nextlvlButton.show()
+  }
+  if(level >= 3){
+    retryButton.show()
+  }
   startBool = false
   deathBool = false
   gameBool = false
   winBool = true
+  level ++
 }
 
 function gameplay(){
-   background(17);
+   // background(17);
+  image(oceanBackground, width/2, height/2, width, height)
+   textFont(pixelFont)
 
-  fill(255)
-  textSize(20)
-  text('Score:' + score, 10, windowHeight - 10)
-  text('Damage:' + damage, 10, windowHeight - 35)
+   fill(255)
+   textSize(20)
+   text('Score:' + score, 70, windowHeight - 10)
+   text('Damage:' + damage, 70, windowHeight - 35)
 
-    // spin around its own center point
+      // spin around its own center point
    if (!paused) {
     angle += rotSpeed;
   }
@@ -164,7 +206,7 @@ function gameplay(){
   }
   rotSpeed = constrain(rotSpeed, -0.15, 0.15);
 
-    // arrow keys move the object along the direction it's currently facing
+      // arrow keys move the object along the direction it's currently facing
   if (keyIsDown(UP_ARROW)) {
     posX += thrustSpeed * cos(angle);
     posY += thrustSpeed * sin(angle);
@@ -177,13 +219,13 @@ function gameplay(){
   }
   if (trail.length > 200) trail.shift();
 
-    // keep it on screen (wrap around edges)
+      // keep it on screen (wrap around edges)
   if (posX < 0) posX = width;
   if (posX > width) posX = 0;
   if (posY < 0) posY = height;
   if (posY > height) posY = 0;
 
-    // faint trail of where it's traveled
+      // faint trail of where it's traveled
   noFill();
   stroke(90, 160, 255, 80);
   strokeWeight(10);
@@ -191,23 +233,20 @@ function gameplay(){
   for (const p of trail) vertex(p.x, p.y);
     endShape();
 
-    // the object itself: spins around its own center, then moves along that facing angle
+      // the object itself: spins around its own center, then moves along that facing angle
   push();
   translate(posX, posY);
-  rotate(angle);
+  rotate(angle + HALF_PI);
   fill(90, 200, 255);
   noStroke();
-  triangle(16, 0, -12, 9, -12, -9);
-    // small marker at its own center point (the point it rotates around)
-  fill(255, 100, 100);
-  circle(0, 0, 5);
+  // triangle(16, 0, -12, 9, -12, -9);
+  image(boat, 0, 0, 70, 70)
   pop();
 
   fill(255)
   for(let i = 0; i < rockX.length; i++){
     ellipse(rockX[i], rockY[i], 50, 50);
     if (dist(posX, posY, rockX[i], rockY[i]) < 25 && damageCooldown == 0){
-      print('Hit Rock!')
       damage ++
       damageCooldown = 30
     }
@@ -218,9 +257,8 @@ function gameplay(){
     ellipse(coinX[i], coinY[i], 25, 25);
     if(dist(posX, posY, coinX[i], coinY[i]) < 15){
       score ++
-      print(score)
 
-      //remove the collected coin
+        //remove the collected coin
       coinX.splice(i, 1);
       coinY.splice(i,1)
     }
@@ -230,17 +268,14 @@ function gameplay(){
     damageCooldown--;
   }
 
-  if(damage == 5){
+  if(damage >= 5){
     gameLoss()
   }
 
-  if(score == 10){
+  if(score >= 10){
     gameWin()
   }
-
 }
-
-
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);

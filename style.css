@@ -7,11 +7,21 @@ canvas {
 }
 
 button {
-  font-family: airstrike;
-  background-color: rgb(187, 35, 197);
-  border: none;
-  color: white;
-  padding: 20px 20px;
+  font-family: pixel;
+  font-size: 24px;
+  background-color: white;
+  border: 4px solid black;
+  color: black;
+  padding: 24px 30px;
   text-align: center;
-  
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+button:hover {
+  background-color: black;
+  color: white;
+  cursor: pointer;
 }
