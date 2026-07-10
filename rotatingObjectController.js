@@ -117,6 +117,8 @@ function draw() {
     fill(17)
     textSize(50)
     text("You Lose!", windowWidth/2, windowHeight/2.75)
+    textSize(15)
+    text("Stranded on an island, you awake to find that your crew has left in the lifeboat, along with the food...", windowWidth/2, windowHeight/2.45)
   }
 
   if (winBool && level > 3){
@@ -124,11 +126,25 @@ function draw() {
     fill(255)
     textSize(50)
     text("You Win!!", windowWidth/2, windowHeight/2.75)
+    textSize(20)
+    text("You used your winnings to host a feast and celebrated with your crew!", windowWidth/2, windowHeight/1.5)
   } else if (winBool){
     image(nextlvlBackground, width/2, height/2, width, height)
     fill(17)
     textSize(50)
     text("Level " + level + " Complete!", windowWidth/2, windowHeight/2.75)
+    if(level == 1){
+      textSize(20)
+      text("You have entered into a dangerous competition...", windowWidth/2, windowHeight/1.5)
+    }
+    if(level == 2){
+      textSize(20)
+      text("To win, you must collect all the coins through increasingly rocky waters", windowWidth/2, windowHeight/1.5)
+    }
+    if(level == 3){
+      textSize(20)
+      text("The winner takes home the loot, but any wrecked sailors are left to their fate...", windowWidth/2, windowHeight/1.5)
+    }
   }
 }
 
@@ -212,15 +228,15 @@ function gameWin(){
 
 function gameplay(){
   image(oceanBackground, width/2, height/2, width, height)
-   textFont(pixelFont)
+  textFont(pixelFont)
 
-   fill(255)
-   textSize(20)
-   text('Score:' + score, 70, windowHeight - 10)
-   text('Damage:' + damage, 70, windowHeight - 35)
+  fill(255)
+  textSize(30)
+  text('Score:' + score, 90, 40)
+  text('Damage:' + damage, 100, 80)
 
       // spin around its own center point
-   if (!paused) {
+  if (!paused) {
     angle += rotSpeed;
   }
 
@@ -275,7 +291,7 @@ function gameplay(){
       vertex(p.x, p.y);
     }
   } 
-    endShape();
+  endShape();
 
       // the object itself: spins around its own center, then moves along that facing angle
   push();
