@@ -30,14 +30,34 @@ let nextlvlButton
 
 let pixelFont
 let oceanBackground
+let nextlvlBackground
+let winBackground
 let boat
 let wreckBackground
+let coinSprite
+
+let damageSound
+let coinSound
+
+let rocks = []
+let rockImages = ['rock1.png', 'rock2.png', 'rock3.png', 'rock4.png', 'rock5.png', 'rock6.png']
+let randoRock = 0
+let rockSprite = []
+
 
 function preload(){
   pixelFont = loadFont('fonts/pixel.ttf')
   oceanBackground = loadImage('images/ocean-pixel-background.png')
-  boat = loadImage('images/pixel-boat.png')
+  boat = loadImage('images/pixel-boat-red.png')
+  coinSprite = loadImage('images/pixel-coin.png')
   wreckBackground = loadImage('images/pixel-shipwreck.jpg')
+  nextlvlBackground = loadImage('images/floating-ship-pixel.png')
+  damageSound = loadSound('audio/wood-crash.mp3')
+  coinSound = loadSound('audio/coin-collect.wav')
+  winBackground = loadImage('images/fireworks-ship-pixel.png')
+  for(let i = 0; i< rockImages.length; i++){
+    rocks[i] = loadImage('images/' + rockImages[i])
+  }
 }
 
 function setup() {
@@ -51,6 +71,7 @@ function setup() {
   for(let i = 0; i < rockNumber[level]; i++){
     rockX.push(random(30, windowWidth - 30))
     rockY.push(random(30, windowHeight - 30))
+    rockSprite.push(int(random(rocks.length)))
   }
 
   for(let i = 0; i < 10; i++){
@@ -60,25 +81,30 @@ function setup() {
 
   startButton = createButton('Start Game')
   startButton.mousePressed(gameStart)
-  //startButton.position(windowWidth/2, windowHeight/2)
 
   retryButton = createButton('Play Again')
   retryButton.mousePressed(gameStart)
-  //retryButton.position(windowWidth/2, windowHeight/2)
   retryButton.hide()
 
   nextlvlButton = createButton('Next Level')
   nextlvlButton.mousePressed(gameStart)
-  //nextlvlButton.position(windowWidth/2, windowHeight/2)
   nextlvlButton.hide()
   
 }
 
 function draw() {
 
+  noStroke()
+  textFont(pixelFont)
+
   // start screen
   if (startBool == true){
-    background(0, 0, 255)
+    fill(17)
+    textSize(50)
+    image(nextlvlBackground, width/2, height/2, width, height)
+    text("Rough Water Sailing", windowWidth/2, windowHeight/2.75)
+    textSize(25)
+    text("Arrow Keys to Move", windowWidth/2, windowHeight/2.45)
   }
 
   if(gameBool == true){
@@ -87,7 +113,6 @@ function draw() {
 
   // death screen
   if(deathBool == true){
-    // background(255, 0, 0)
     image(wreckBackground, width/2, height/2, width, height)
     fill(17)
     textSize(50)
@@ -95,12 +120,12 @@ function draw() {
   }
 
   if (winBool && level > 3){
-    background(240, 233, 46)
-    fill(17)
+    image(winBackground, width/2, height/2, width, height)
+    fill(255)
     textSize(50)
     text("You Win!!", windowWidth/2, windowHeight/2.75)
   } else if (winBool){
-    background(0, 255, 0)
+    image(nextlvlBackground, width/2, height/2, width, height)
     fill(17)
     textSize(50)
     text("Level " + level + " Complete!", windowWidth/2, windowHeight/2.75)
@@ -147,13 +172,15 @@ function gameStart() {
   rockY = [];
   coinX = [];
   coinY = [];
+  rockSprite = []
 
-  for (let i = 0; i < rockNumber[level]; i++) {
+  for (let i = 0; i < rockNumber[level]; i++){
     rockX.push(random(30, width - 30));
     rockY.push(random(30, height - 30));
+    rockSprite.push(int(random(rocks.length)))
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 10; i++){
     coinX.push(random(30, width - 30));
     coinY.push(random(30, height - 30));
   }
@@ -184,7 +211,6 @@ function gameWin(){
 }
 
 function gameplay(){
-   // background(17);
   image(oceanBackground, width/2, height/2, width, height)
    textFont(pixelFont)
 
@@ -220,17 +246,35 @@ function gameplay(){
   if (trail.length > 200) trail.shift();
 
       // keep it on screen (wrap around edges)
-  if (posX < 0) posX = width;
-  if (posX > width) posX = 0;
-  if (posY < 0) posY = height;
-  if (posY > height) posY = 0;
-
+  if (posX < 0){
+    posX = width;
+    trail.push(null)
+  }
+  if (posX > width){
+    posX = 0;
+    trail.push(null)
+  }
+  if (posY < 0){
+    posY = height;
+    trail.push(null)
+  }
+  if (posY > height){
+    posY = 0;
+    trail.push(null)
+  }
       // faint trail of where it's traveled
   noFill();
   stroke(90, 160, 255, 80);
   strokeWeight(10);
   beginShape();
-  for (const p of trail) vertex(p.x, p.y);
+  for (const p of trail){
+    if (p === null){
+      endShape()
+      beginShape()
+    } else {
+      vertex(p.x, p.y);
+    }
+  } 
     endShape();
 
       // the object itself: spins around its own center, then moves along that facing angle
@@ -239,26 +283,26 @@ function gameplay(){
   rotate(angle + HALF_PI);
   fill(90, 200, 255);
   noStroke();
-  // triangle(16, 0, -12, 9, -12, -9);
   image(boat, 0, 0, 70, 70)
   pop();
 
-  fill(255)
   for(let i = 0; i < rockX.length; i++){
-    ellipse(rockX[i], rockY[i], 50, 50);
-    if (dist(posX, posY, rockX[i], rockY[i]) < 25 && damageCooldown == 0){
+    image(rocks[rockSprite[i]], rockX[i], rockY[i], 70, 70)
+    if (dist(posX, posY, rockX[i], rockY[i]) < 40 && damageCooldown == 0){
       damage ++
-      damageCooldown = 30
+      damageSound.play()
+      damageCooldown = 40
     }
   }
 
   fill(240, 233, 46)
   for(let i = 0; i < coinX.length; i++){
-    ellipse(coinX[i], coinY[i], 25, 25);
-    if(dist(posX, posY, coinX[i], coinY[i]) < 15){
+    image(coinSprite, coinX[i], coinY[i], 25, 25)
+    if(dist(posX, posY, coinX[i], coinY[i]) < 20){
       score ++
+      coinSound.play()
 
-        //remove the collected coin
+      //remove the collected coin
       coinX.splice(i, 1);
       coinY.splice(i,1)
     }
